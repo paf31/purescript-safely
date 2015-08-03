@@ -14,12 +14,10 @@ However, we can make it stack-safe by using the `safely` combinator:
 
 ```text
 replicateS :: forall m a. (MonadRec m) => Int -> m a -> m (List a)
-replicateS n m = safely \up down -> down (replicateM n (up m))
+replicateS n m = safely \up -> replicateM n (up m)
 ```
 
-`safely` provides us two natural transformations: one to lift our `MonadRec` into a full `Monad`, and one to lower it back down again.
-
-We lift the action we want to `replicate(M)` with `up`, and afterwards, lower it again with `down`. The result is a stack-safe function which works with any `MonadRec`.
+`safely` provides us a natural transformation to lift our `MonadRec` into a full `Monad`, which we can use to lift the action we want to replicate.
 
 ```text
 > replicateM 100000 (log "Testing...")
