@@ -20,7 +20,7 @@ replicateS n m = safely \up -> replicateM n (up m)
 `safely` provides us a natural transformation to lift our `MonadRec` into a full `Monad`, which we can use to lift the action we want to replicate.
 
 ```text
-> replicateM 100000 (log "Testing...")
+> replicateS 100000 (log "Testing...")
 
 Testing...
 Testing...
