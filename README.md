@@ -10,14 +10,32 @@ For example, `purescript-lists` defines `replicateM`, which is not stack-safe. I
 RangeError: Maximum call stack size exceeded
 ```
 
-However, we can make it stack-safe by using the `safely` combinator:
+However, we can make it stack-safe by using the `safely` combinator. First, define a data type to wrap `replicateM`:
 
-```text
-replicateS :: forall m a. (MonadRec m) => Int -> m a -> m (List a)
-replicateS n m = safely \up -> replicateM n (up m)
+```purescript
+newtype Replicator m = Replicator (forall a. Int -> m a -> m (List a))
+
+runReplicator :: forall m a. Replicator m -> Int -> m a -> m (List a)
+runReplicator (Replicator r) = r
 ```
 
-`safely` provides us a natural transformation to lift our `MonadRec` into a full `Monad`, which we can use to lift the action we want to replicate.
+We need to define an instance of the `Operator` class:
+
+```purescript
+instance replicator :: Operator Replicator where
+  mapO to fro (Replicator r) = Replicator \n m -> to (r n (fro m))
+```
+
+`mapO` modifies the underlying monad using a pair of monad morphisms.
+
+Now we can derive a stack-safe implementation:
+
+```purescript
+replicateS :: forall m a. (MonadRec m) => Int -> m a -> m (List a)
+replicateS = runReplicator (safely (Replicator replicateM))
+```
+
+which works for large inputs:
 
 ```text
 > replicateS 100000 (log "Testing...")
