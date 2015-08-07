@@ -3,6 +3,7 @@ module Test.Main where
 import Prelude
 
 import Data.List
+import Data.Functor
 
 import Control.Safely
 import Control.Monad.Rec.Class
@@ -20,6 +21,24 @@ runReplicator (Replicator r) = r
 replicateS :: forall m a. (MonadRec m) => Int -> m a -> m (List a)
 replicateS = runReplicator (safely (Replicator replicateM))
 
+newtype Mapper m = Mapper (forall a. (a -> m Unit) -> List a -> m Unit)
+
+runMapper :: forall m a. Mapper m -> (a -> m Unit) -> List a -> m Unit
+runMapper (Mapper f) = f
+
+instance mapperOperator :: Operator Mapper where
+  mapO to fro (Mapper f) = Mapper \p ta -> to (f (fro <<< p) ta) 
+
+traverse_ :: forall m a. (Monad m) => (a -> m Unit) -> List a -> m Unit
+traverse_ f = go
+  where
+  go Nil = return unit
+  go (Cons x xs) = do
+    f x
+    go xs
+
+traverseS :: forall t m a b. (MonadRec m) => (a -> m Unit) -> List a -> m Unit
+traverseS = runMapper (safely (Mapper traverse_))
+
 main = do
-  replicateS 100000 (log "Testing...")
-  log "If you can see this, everything worked."
+  traverseS print (Data.List.range 1 1000000)

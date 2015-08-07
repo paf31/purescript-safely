@@ -11,8 +11,6 @@
     "output"
   ],
   "dependencies": {
-    "purescript-console": "^0.1.0",
-    "purescript-coroutines": "~0.2.2",
-    "purescript-lists": "~0.7.1"
+    "purescript-freet": "~0.1.3"
   }
 }

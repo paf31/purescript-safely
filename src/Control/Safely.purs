@@ -2,8 +2,10 @@ module Control.Safely where
 
 import Prelude
 
+import Data.Identity (runIdentity)
+
 import Control.Monad.Trans (lift)
-import Control.Coroutine (runProcess)
+import Control.Monad.Free.Trans (runFreeT)
 import Control.Monad.Rec.Class (MonadRec)
 
 -- | A monad morphism.
@@ -17,4 +19,4 @@ class Operator o where
 
 -- | Make a control operator stack-safe.
 safely :: forall o m a. (Operator o, MonadRec m) => (forall t. (Monad t) => o t) -> o m
-safely o = mapO runProcess lift o
+safely o = mapO (runFreeT (return <<< runIdentity)) lift o
