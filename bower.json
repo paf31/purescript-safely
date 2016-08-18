@@ -11,6 +11,10 @@
     "output"
   ],
   "license": "MIT",
+  "repository": {                                                          
+    "type": "git",                                                         
+    "url": "git://github.com/paf31/purescript-safely.git"            
+  },
   "dependencies": {
     "purescript-freet": "^1.0.0",
     "purescript-lists": "^1.0.1"
