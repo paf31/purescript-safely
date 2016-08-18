@@ -10,6 +10,7 @@
     "bower_components",
     "output"
   ],
+  "license": "MIT",
   "dependencies": {
     "purescript-freet": "^1.0.0",
     "purescript-lists": "^1.0.1"
