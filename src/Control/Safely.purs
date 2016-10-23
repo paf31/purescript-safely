@@ -1,18 +1,20 @@
 module Control.Safely
   ( safely
-  , replicateS_
-  , traverseS_
-  , foldS
+  , replicateM_
+  , traverse_
+  , for_
+  , foldM
   ) where
 
 import Prelude
-
+import Data.Foldable as Foldable
 import Control.Monad.Free.Trans (FreeT, runFreeT)
-import Control.Monad.Rec.Class (class MonadRec)
-import Control.Monad.Trans (lift)
-import Data.Foldable (class Foldable, traverse_)
-import Data.Identity (Identity, runIdentity)
-import Data.List (List(..))
+import Control.Monad.Rec.Class (tailRecM2, Step(..), tailRecM, class MonadRec)
+import Control.Monad.Trans.Class (lift)
+import Data.Foldable (class Foldable)
+import Data.Identity (Identity)
+import Data.List (List(..), (:))
+import Data.Newtype (unwrap)
 
 -- | Make a control operator stack-safe.
 -- |
@@ -28,8 +30,8 @@ import Data.List (List(..))
 -- | `safely`:
 -- |
 -- | ```purescript
--- | traverseS_ :: forall m a. MonadRec m => (a -> m Unit) -> List a -> m Unit
--- | traverseS_ f xs = safely \lift lower ->
+-- | traverseSafely :: forall m a. MonadRec m => (a -> m Unit) -> List a -> m Unit
+-- | traverseSafely f xs = safely \lift lower ->
 -- |   let
 -- |     go Nil = pure unit
 -- |     go (Cons x xs) = do
@@ -42,28 +44,30 @@ safely
    . MonadRec m
   => (forall safe. MonadRec safe => (m ~> safe) -> (safe ~> m) -> safe a)
   -> m a
-safely f = lower (f lift lower)
-  where
-    lower :: forall f. MonadRec f => FreeT Identity f ~> f
-    lower = runFreeT (pure <<< runIdentity)
+safely f = lower (f lift lower) where
+  lower :: forall f. MonadRec f => FreeT Identity f ~> f
+  lower = runFreeT (pure <<< unwrap)
 
 -- | Safely replicate an action N times.
-replicateS_ :: forall m a. MonadRec m => Int -> m a -> m Unit
-replicateS_ n x = safely \lift _ ->
-  let go i | i <= 0 = pure unit
-           | otherwise = do lift x
-                            go (i - 1)
-  in go n
+replicateM_ :: forall m a. MonadRec m => Int -> m a -> m Unit
+replicateM_ n x = tailRecM step n where
+  step :: Int -> m (Step Int Unit)
+  step 0 = pure (Done unit)
+  step n = x $> Loop (n - 1)
 
 -- | Safely traverse a foldable container.
-traverseS_ :: forall f m a. (Foldable f, MonadRec m) => (a -> m Unit) -> f a -> m Unit
-traverseS_ f xs = safely \lift _ -> traverse_ (f >>> lift) xs
+traverse_ :: forall f m a. (Foldable f, MonadRec m) => (a -> m Unit) -> f a -> m Unit
+traverse_ f xs = safely \lift _ -> Foldable.traverse_ (f >>> lift) xs
+
+-- | Safely traverse a foldable container.
+for_ :: forall f m a. (Foldable f, MonadRec m) => f a -> (a -> m Unit) -> m Unit
+for_ = flip traverse_
 
 -- | Perform a monadic fold, safely.
-foldS :: forall m a b. MonadRec m => (a -> b -> m a) -> a -> List b -> m a
-foldS step a0 bs = safely \lift _ ->
-  let go a Nil = pure a
-      go a (Cons x xs) = do
-        a' <- lift (step a x)
-        go a' xs
-  in go a0 bs
+foldM :: forall m a b. MonadRec m => (a -> b -> m a) -> a -> List b -> m a
+foldM f = tailRecM2 step where
+  step :: a -> List b -> m (Step { a :: a, b :: List b } a)
+  step a Nil = pure (Done a)
+  step a (b : bs) = do
+    a' <- f a b
+    pure (Loop { a: a', b: bs })

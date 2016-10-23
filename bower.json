@@ -1,6 +1,5 @@
 {
   "name": "purescript-safely",
-  "version": "1.0.0",
   "moduleType": [
     "node"
   ],
@@ -11,12 +10,12 @@
     "output"
   ],
   "license": "MIT",
-  "repository": {                                                          
-    "type": "git",                                                         
-    "url": "git://github.com/paf31/purescript-safely.git"            
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/paf31/purescript-safely.git"
   },
   "dependencies": {
-    "purescript-freet": "^1.0.0",
-    "purescript-lists": "^1.0.1"
+    "purescript-freet": "^2.0.0",
+    "purescript-lists": "^3.0.0"
   }
 }

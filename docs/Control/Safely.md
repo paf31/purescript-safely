@@ -20,8 +20,8 @@ simply writing the naive implementation, and wrapping it in a call to
 `safely`:
 
 ```purescript
-traverseS_ :: forall m a. MonadRec m => (a -> m Unit) -> List a -> m Unit
-traverseS_ f xs = safely \lift lower ->
+traverseSafely :: forall m a. MonadRec m => (a -> m Unit) -> List a -> m Unit
+traverseSafely f xs = safely \lift lower ->
   let
     go Nil = pure unit
     go (Cons x xs) = do
@@ -30,26 +30,34 @@ traverseS_ f xs = safely \lift lower ->
   in go xs
 ```
 
-#### `replicateS_`
+#### `replicateM_`
 
 ``` purescript
-replicateS_ :: forall m a. MonadRec m => Int -> m a -> m Unit
+replicateM_ :: forall m a. MonadRec m => Int -> m a -> m Unit
 ```
 
 Safely replicate an action N times.
 
-#### `traverseS_`
+#### `traverse_`
 
 ``` purescript
-traverseS_ :: forall f m a. (Foldable f, MonadRec m) => (a -> m Unit) -> f a -> m Unit
+traverse_ :: forall f m a. (Foldable f, MonadRec m) => (a -> m Unit) -> f a -> m Unit
 ```
 
 Safely traverse a foldable container.
 
-#### `foldS`
+#### `for_`
 
 ``` purescript
-foldS :: forall m a b. MonadRec m => (a -> b -> m a) -> a -> List b -> m a
+for_ :: forall f m a. (Foldable f, MonadRec m) => f a -> (a -> m Unit) -> m Unit
+```
+
+Safely traverse a foldable container.
+
+#### `foldM`
+
+``` purescript
+foldM :: forall m a b. MonadRec m => (a -> b -> m a) -> a -> List b -> m a
 ```
 
 Perform a monadic fold, safely.
