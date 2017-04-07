@@ -53,14 +53,14 @@ replicateM_ :: forall m a. MonadRec m => Int -> m a -> m Unit
 replicateM_ n x = tailRecM step n where
   step :: Int -> m (Step Int Unit)
   step 0 = pure (Done unit)
-  step n = x $> Loop (n - 1)
+  step m = x $> Loop (m - 1)
 
 -- | Safely traverse a foldable container.
-traverse_ :: forall f m a. (Foldable f, MonadRec m) => (a -> m Unit) -> f a -> m Unit
+traverse_ :: forall f m a. Foldable f => MonadRec m => (a -> m Unit) -> f a -> m Unit
 traverse_ f xs = safely \lift _ -> Foldable.traverse_ (f >>> lift) xs
 
 -- | Safely traverse a foldable container.
-for_ :: forall f m a. (Foldable f, MonadRec m) => f a -> (a -> m Unit) -> m Unit
+for_ :: forall f m a. Foldable f => MonadRec m => f a -> (a -> m Unit) -> m Unit
 for_ = flip traverse_
 
 -- | Perform a monadic fold, safely.

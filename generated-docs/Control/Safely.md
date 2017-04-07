@@ -41,7 +41,7 @@ Safely replicate an action N times.
 #### `traverse_`
 
 ``` purescript
-traverse_ :: forall f m a. (Foldable f, MonadRec m) => (a -> m Unit) -> f a -> m Unit
+traverse_ :: forall f m a. Foldable f => MonadRec m => (a -> m Unit) -> f a -> m Unit
 ```
 
 Safely traverse a foldable container.
@@ -49,7 +49,7 @@ Safely traverse a foldable container.
 #### `for_`
 
 ``` purescript
-for_ :: forall f m a. (Foldable f, MonadRec m) => f a -> (a -> m Unit) -> m Unit
+for_ :: forall f m a. Foldable f => MonadRec m => f a -> (a -> m Unit) -> m Unit
 ```
 
 Safely traverse a foldable container.
