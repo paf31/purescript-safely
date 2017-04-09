@@ -31,3 +31,7 @@ replicateS_ n x = safely \lift _ ->
                             go (i - 1)
   in go n
 ```
+
+## Documentation
+
+Module documentation is [published on Pursuit](http://pursuit.purescript.org/packages/purescript-safely).
