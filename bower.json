@@ -15,7 +15,10 @@
     "url": "git://github.com/paf31/purescript-safely.git"
   },
   "dependencies": {
-    "purescript-freet": "^3.0.0",
-    "purescript-lists": "^4.0.0"
+    "purescript-freet": "^4.0.0",
+    "purescript-lists": "^5.0.0"
+  },
+  "devDependencies": {
+    "purescript-console": "^4.1.0"
   }
 }
