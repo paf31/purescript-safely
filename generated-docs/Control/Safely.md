@@ -57,7 +57,7 @@ Safely traverse a foldable container.
 #### `foldM`
 
 ``` purescript
-foldM :: forall m a b. MonadRec m => (a -> b -> m a) -> a -> List b -> m a
+foldM :: forall m a b. MonadRec m => (b -> a -> m b) -> b -> List a -> m b
 ```
 
 Perform a monadic fold, safely.

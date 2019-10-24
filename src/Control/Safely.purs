@@ -64,10 +64,10 @@ for_ :: forall f m a. Foldable f => MonadRec m => f a -> (a -> m Unit) -> m Unit
 for_ = flip traverse_
 
 -- | Perform a monadic fold, safely.
-foldM :: forall m a b. MonadRec m => (a -> b -> m a) -> a -> List b -> m a
+foldM :: forall m a b. MonadRec m => (b -> a -> m b) -> b -> List a -> m b
 foldM f = tailRecM2 step where
-  step :: a -> List b -> m (Step { a :: a, b :: List b } a)
-  step a Nil = pure (Done a)
-  step a (b : bs) = do
-    a' <- f a b
-    pure (Loop { a: a', b: bs })
+  step :: b -> List a -> m (Step { a :: b, b :: List a } b)
+  step b Nil = pure (Done b)
+  step b (a : as) = do
+    b' <- f b a
+    pure (Loop { a: b', b: as })
